@@ -13,6 +13,7 @@
 #include <iostream>
 #include <list>
 #include <print>
+#include <ranges>
 #include <vector>
 
 int main()
@@ -51,14 +52,15 @@ int main()
   }
   std::println();
 
-  // list should use cached iterators.
-  std::list<int> lst = {10, 20, 30, 40, 50};
+  // Use a generating view
   for (auto x : std::views::iota(50, 60) | dd::views::slice(2, 5))
   {
     std::print("{} ", x);
   }
   std::println();
 
+  // list should use cached iterators.
+  std::list<int> lst = {10, 20, 30, 40, 50};
   const auto slice_cached = dd::ranges::slice_view(lst, 2, 5);
   std::cout << "\nsizeof cached slice_view: " << sizeof(slice_cached) << "\n";
   std::println("size: {}", slice1.size());

@@ -11,11 +11,11 @@
 #pragma once
 
 #include "dd/maybe_present.hpp"
+#include "dd/non_propagating_cache.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <concepts>
-#include <optional>
 #include <ranges>
 #include <type_traits>
 
@@ -45,7 +45,7 @@ class slice_view : public std::ranges::view_interface<slice_view<R>>
     !(std::ranges::random_access_range<R> && std::ranges::sized_range<R>);
 
   // The cached iterator type.
-  using cached_iterator = std::optional<std::ranges::iterator_t<R>>;
+  using cached_iterator = non_propagating_cache<std::ranges::iterator_t<R>>;
 
 public:
   /**
