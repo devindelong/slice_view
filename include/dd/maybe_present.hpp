@@ -10,13 +10,15 @@
 
 #pragma once
 
+#include <initializer_list>
 #include <type_traits>
+#include <utility>
 
 /**
  * @brief Creates a unique empty type.
  * @detail Relies on the fact that every lanbda is a unique type.
  */
-#define DD_UNIQUE_EMPTY_TYPE ::dd::empty_type<decltype([]() {})>
+#define DD_UNIQUE_EMPTY_TYPE ::dd::empty_type<decltype([]() -> void {})>
 
 namespace dd
 {
@@ -25,17 +27,41 @@ namespace dd
  * @brief An empty type.
  * @tparam T Type parameter used to generate unique empty types.
  */
-template <typename T>
+template <typename T = void>
 struct empty_type
 {
   /**
-   * @brief Variadiv constructor to construct from anything.
+   * @brief Variadic constructor to construct from anything.
    * @details Since this might be used in conditional type expressions, where the
    * resulting type is either an empty type or a user-defined type, a variadic constructor
    * is needed so that both types can be constructed from the same arguments. The empty
    * type must be constructible from an unknown number of type arguments.
    */
-  constexpr empty_type(auto&&...) {}
+  constexpr empty_type(auto&&...) noexcept {}
+
+  // 2. initializer_list constructor
+  template <typename U>
+  constexpr empty_type(std::initializer_list<U>, auto&&...) noexcept
+  {
+  }
+
+  // 4. initializer_list + in_place_t constructor
+  template <typename U>
+  constexpr empty_type(std::in_place_t, std::initializer_list<U>) noexcept
+  {
+  }
+
+  // 6. initializer_list + in_place_type constructor
+  template <typename U, typename V>
+  constexpr empty_type(std::in_place_type_t<U>, std::initializer_list<V>) noexcept
+  {
+  }
+
+  // 8. initializer_list + in_place_index constructor
+  template <std::size_t I, typename U>
+  constexpr empty_type(std::in_place_index_t<I>, std::initializer_list<U>) noexcept
+  {
+  }
 };
 
 /**

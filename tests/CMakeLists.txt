@@ -8,7 +8,7 @@
 #
 # ==============================================================================
 
-set (SLICE_VIEW_TESTS "neonxx_tests")
+set (SLICE_VIEW_TESTS "slice_view_tests")
 
 include (FetchContent)
 FetchContent_Declare (
