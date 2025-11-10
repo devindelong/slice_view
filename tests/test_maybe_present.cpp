@@ -51,20 +51,19 @@ TEST_CASE("maybe_present_t: empty type uniqueness", "[sizeof]")
 
 TEST_CASE("maybe_present_t: initializer list construction", "[constructor]")
 {
-  using vector = std::vector<int>;
+  using container = std::vector<int>;
 
   REQUIRE(
     std::constructible_from<
-      dd::maybe_present_t<true, vector>, std::initializer_list<int>>);
+      dd::maybe_present_t<true, container>, std::initializer_list<int>>);
   REQUIRE(
     std::constructible_from<
-      dd::maybe_present_t<false, vector>, std::initializer_list<int>>);
+      dd::maybe_present_t<false, container>, std::initializer_list<int>>);
 }
 
 TEST_CASE("maybe_present_t: in place construction", "[constructor]")
 {
-  using vector = std::vector<int>;
-  using optional_vector = std::optional<vector>;
+  using optional_vector = std::optional<std::vector<int>>;
 
   REQUIRE(
     std::constructible_from<
