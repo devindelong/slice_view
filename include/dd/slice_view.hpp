@@ -10,8 +10,7 @@
 
 #pragma once
 
-#include "dd/maybe_present.hpp"
-#include "dd/non_propagating_cache.hpp"
+#include "dd/cached_iterator.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -38,14 +37,6 @@ concept const_copyable_or_movable =
 template <std::ranges::viewable_range R>
 class slice_view : public std::ranges::view_interface<slice_view<R>>
 {
-  // Indicates if cached iterators should be used.
-  // Cached iterators are used for ranges where std::ranges::next is not constant time.
-  static constexpr bool use_cached_iterators_ =
-    std::ranges::forward_range<R> &&
-    !(std::ranges::random_access_range<R> && std::ranges::sized_range<R>);
-
-  // The cached iterator type.
-  using cached_iterator = non_propagating_cache<std::ranges::iterator_t<R>>;
 
 public:
   /**
@@ -135,11 +126,11 @@ private:
    * cached_iterator or an empty type. The empty types need to be distinct empty types
    * in order for [[no_unique_address]] to work properly. This is the reason for the
    * template: the cached begin and end iterators are distinct empty types when
-   * use_cached_iterators_ is false.
+   * is_cached_iterator_ is false.
    */
   [[nodiscard]] constexpr auto next(auto& iter, difference_type n) const
   {
-    if constexpr (use_cached_iterators_)
+    if constexpr (cacheable_range<R>)
     {
       if (iter.has_value())
       {
@@ -149,7 +140,7 @@ private:
 
     auto next_iter =
       std::ranges::next(std::ranges::begin(base_), n, std::ranges::end(base_));
-    if constexpr (use_cached_iterators_)
+    if constexpr (cacheable_range<R>)
     {
       iter.emplace(next_iter);
     }
@@ -160,10 +151,8 @@ private:
   difference_type start_index_{0};
   difference_type end_index_{0};
 
-  [[no_unique_address]]
-  mutable maybe_present_t<use_cached_iterators_, cached_iterator> begin_;
-  [[no_unique_address]]
-  mutable maybe_present_t<use_cached_iterators_, cached_iterator> end_;
+  [[no_unique_address]] mutable maybe_cached_iterator_t<R> begin_;
+  [[no_unique_address]] mutable maybe_cached_iterator_t<R> end_;
 };
 
 /**

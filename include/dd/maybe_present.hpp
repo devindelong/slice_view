@@ -12,16 +12,20 @@
 
 #include <initializer_list>
 #include <type_traits>
-#include <utility>
 
 /**
  * @brief Creates a unique empty type.
- * @detail Relies on the fact that every lanbda is a unique type.
+ * @detail Relies on the fact that every lanbda is a unique closure type.
  */
-#define DD_UNIQUE_EMPTY_TYPE ::dd::empty_type<decltype([]() -> void {})>
+#define DD_UNIQUE_EMPTY_TYPE ::dd::empty_type<decltype([] {})>
 
 namespace dd
 {
+/**
+ * @brief Concept for std::is_empty_v.
+ */
+template <typename T>
+concept is_empty = std::is_empty_v<T>;
 
 /**
  * @brief An empty type.
@@ -45,21 +49,8 @@ struct empty_type
   {
   }
 
-  // 4. initializer_list + in_place_t constructor
   template <typename U>
-  constexpr empty_type(std::in_place_t, std::initializer_list<U>) noexcept
-  {
-  }
-
-  // 6. initializer_list + in_place_type constructor
-  template <typename U, typename V>
-  constexpr empty_type(std::in_place_type_t<U>, std::initializer_list<V>) noexcept
-  {
-  }
-
-  // 8. initializer_list + in_place_index constructor
-  template <std::size_t I, typename U>
-  constexpr empty_type(std::in_place_index_t<I>, std::initializer_list<U>) noexcept
+  constexpr empty_type(auto&&..., std::initializer_list<U>) noexcept
   {
   }
 };
@@ -74,7 +65,7 @@ struct empty_type
  * type will not be unique between instances of each alias and [[no_unique_address]] will
  * result in an extra added byte for each instance of the same type.
  */
-template <bool Present, typename T, typename E = DD_UNIQUE_EMPTY_TYPE>
+template <bool Present, typename T, is_empty E = DD_UNIQUE_EMPTY_TYPE>
 using maybe_present_t = std::conditional_t<Present, T, E>;
 
 } // namespace dd
