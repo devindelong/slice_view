@@ -100,7 +100,6 @@ public:
    */
   constexpr auto value(this auto& self) -> decltype(auto) { return *self.value_; }
 
-  // Forward has_value() from the optional.
   /**
    * @brief Checks if there is a cached value.
    * @return True if a value is cached, false otherwise.

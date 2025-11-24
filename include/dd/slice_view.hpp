@@ -11,6 +11,7 @@
 #pragma once
 
 #include "dd/cached_iterator.hpp"
+#include "dd/type_traits.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -69,10 +70,11 @@ public:
    * @param self Explicit object parameter (deducing this)
    * @return A copy-constructed or move-constructed instance of the underlying view.
    */
-  [[nodiscard]] constexpr auto base(this auto&& self) -> R
-    requires detail::const_copyable_or_movable<decltype(self.base_)>
+  template <typename Self>
+  [[nodiscard]] constexpr auto base(this Self&& self) -> R
+    requires detail::const_copyable_or_movable<like_t<Self, R>>
   {
-    return std::forward_like<decltype(self)>(self.base_);
+    return std::forward_like<Self>(self.base_);
   }
 
   /**
@@ -80,8 +82,9 @@ public:
    * @param self Explicit object parameter (deducing this)
    * @return Iterator to the beginning of the slice view.
    */
-  [[nodiscard]] constexpr auto begin(this auto&& self)
-    requires std::ranges::range<decltype(self.base_)>
+  template <typename Self>
+  [[nodiscard]] constexpr auto begin(this Self&& self)
+    requires std::ranges::range<like_t<Self, R>>
   {
     return self.next(self.begin_, self.start_index_);
   }
@@ -91,8 +94,9 @@ public:
    * @param self Explicit object parameter (deducing this)
    * @return Iterator to the beginning of the slice view.
    */
-  [[nodiscard]] constexpr auto end(this auto&& self)
-    requires std::ranges::range<decltype(self.base_)>
+  template <typename Self>
+  [[nodiscard]] constexpr auto end(this Self&& self)
+    requires std::ranges::range<like_t<Self, R>>
   {
     return self.next(self.end_, self.end_index_);
   }
@@ -102,8 +106,9 @@ public:
    * @param self Explicit object parameter (deducing this)
    * @return Size of the range.
    */
-  [[nodiscard]] constexpr auto size(this auto&& self)
-    requires std::ranges::sized_range<decltype(self.base_)>
+  template <typename Self>
+  [[nodiscard]] constexpr auto size(this Self&& self)
+    requires std::ranges::sized_range<like_t<Self, R>>
   {
     constexpr auto zero = difference_type{0};
     const auto base_size = std::ranges::ssize(self.base_);

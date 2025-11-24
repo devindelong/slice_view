@@ -31,7 +31,7 @@ int main()
   std::println();
 
   // Use with r-value generator
-  auto slice2 = dd::ranges::slice_view(std::views::iota(0, 10), 2, 5);
+  const auto slice2 = dd::ranges::slice_view(std::views::iota(0, 10), 2, 5);
   for (auto x : slice2)
   {
     std::print("{} ", x);
